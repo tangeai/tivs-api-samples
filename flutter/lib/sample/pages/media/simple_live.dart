@@ -36,6 +36,8 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
   bool _closing = false;
   bool _resume_pending = false;
   Future<void>? _stop_operation;
+  double _displayWidth = 320;
+  double _displayHeight = 180;
 
   @override
   Widget build(BuildContext context) => _scaffold(
@@ -51,18 +53,83 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
       );
 
   Widget _buildPlayer() {
-    return Stack(
-      children: [
-        Center(
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            // Player 提供的 Widget，用于展示视频画面
-            child: _player.texture(),
-          ),
-        ),
-        if (!_rendering && !_establishFailed) createBufferingWidget(),
-        if (_establishFailed) _establishFailedWidget(),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = math.max(1.0, constraints.maxWidth);
+        final maxHeight = math.max(1.0, constraints.maxHeight - 180);
+        final width = math.min(_displayWidth, maxWidth);
+        final height = math.min(_displayHeight, maxHeight);
+        return Column(
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  Center(
+                    child: SizedBox(
+                      width: width,
+                      height: height,
+                      child: _player.texture(),
+                    ),
+                  ),
+                  if (!_rendering && !_establishFailed) createBufferingWidget(),
+                  if (_establishFailed) _establishFailedWidget(),
+                ],
+              ),
+            ),
+            ColoredBox(
+              color: SampleThemeConfigure.colorBackground,
+              child: Column(
+                children: [
+                  Text('拉伸铺满 · ${width.round()} × ${height.round()}'),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final preset in const <String, Size>{
+                        '16:9': Size(320, 180),
+                        '4:3': Size(320, 240),
+                        '1:1': Size(320, 320),
+                      }.entries)
+                        ChoiceChip(
+                          label: Text(preset.key),
+                          selected: (width / height -
+                                      preset.value.width / preset.value.height)
+                                  .abs() <
+                              0.01,
+                          onSelected: (_) => setState(() {
+                            _displayWidth = preset.value.width;
+                            _displayHeight = preset.value.height;
+                          }),
+                        ),
+                    ],
+                  ),
+                  Row(children: [
+                    const SizedBox(width: 40, child: Text('宽')),
+                    Expanded(
+                      child: Slider(
+                        value: width,
+                        min: 1,
+                        max: maxWidth,
+                        onChanged: (value) => setState(() => _displayWidth = value),
+                      ),
+                    ),
+                  ]),
+                  Row(children: [
+                    const SizedBox(width: 40, child: Text('高')),
+                    Expanded(
+                      child: Slider(
+                        value: height,
+                        min: 1,
+                        max: maxHeight,
+                        onChanged: (value) => setState(() => _displayHeight = value),
+                      ),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -192,6 +259,7 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
 
     // 3. 初始化 Player
     _player = _createSamplePlayer(live: true);
+    _player.setVideoScalingMode(VideoScalingMode.stretch);
     _player.onRenderState = (state) {
       if (!mounted || _closing) return;
       setState(() => _rendering = state != RenderState.buffering);

@@ -624,14 +624,14 @@ void _handleOnTap(Primary primary, BuildContext pageContext) {
                   size: 28,
                 ),
                 title: const Text(
-                  "简易播放页",
+                  "简易播放页（拉伸铺满）",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 subtitle: const Text(
-                  "轻量级实现 • 快速集成演示",
+                  "可调宽高 • 画面拉伸演示",
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey,
