@@ -1,6 +1,6 @@
 # Flutter API Samples
 
-SDK `1.8.0-alpha.15` from hosted source `https://tangeai.github.io/tivs-sdk-flutter-hosted`. The complete package contains its native dependencies.
+SDK `1.8.0-alpha.16` from hosted source `https://tangeai.github.io/tivs-sdk-flutter-hosted`. The complete package contains its native dependencies.
 
 Build the macOS application:
 
@@ -15,7 +15,7 @@ Build the isolated package loader with:
 
 ```sh
 flutter build macos --target lib/sdk_load_probe.dart \
-  --dart-define=RAPID_EXPECTED_VERSION=1.8.0-alpha.15
+  --dart-define=RAPID_EXPECTED_VERSION=1.8.0-alpha.16
 ```
 
 Run the executable in the generated App. It verifies the native version and Core/Media/SDL FFI exports. Git dependencies are supported in customer applications; pub.dev packages cannot declare Git dependencies.

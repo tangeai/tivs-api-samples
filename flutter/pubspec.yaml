@@ -11,7 +11,7 @@ dependencies:
 
   rapid_kit:
     hosted: https://tangeai.github.io/tivs-sdk-flutter-hosted
-    version: 1.8.0-alpha.15
+    version: 1.8.0-alpha.16
   
   http: 0.13.6
   cupertino_icons: ^1.0.6
