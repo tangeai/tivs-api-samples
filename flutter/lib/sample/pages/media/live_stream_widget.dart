@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 part of '../rapid_kit_sample_pages.dart';
 
 class LiveStreamWidget extends StatefulWidget {
@@ -62,6 +63,8 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
   bool _streamStarted = false;
   bool _secondaryStreamStarted = false;
   bool _primaryPlaybackReadyNotified = false;
+  bool _resume_pending = false;
+  Future<void>? _stop_operation;
   bool _audioMuted = false;
   bool _videoCapturing = false;
   bool _actualRendering = false;
@@ -175,13 +178,7 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
     _cancelSecondaryStart();
     _resetRecordElapsedState();
     _dumpController.forceStopIfNeeded('dispose', notifyStateChanged: false);
-    if (_streamStarted || _secondaryStreamStarted) {
-      _stopAllPlayers();
-    }
-    _disposeAllPlayers();
-    _pipe.abolish();
-    _pipe.destroy();
-    _chatSession.destroy();
+    unawaited(_close_session());
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -199,6 +196,13 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
 
   void start() {
     if (_disposed) {
+      return;
+    }
+    if (_stop_operation != null) {
+      if (!_resume_pending) {
+        _resume_pending = true;
+        unawaited(_resume_after_stop(_stop_operation!));
+      }
       return;
     }
     _logStreamState('start_requested');
@@ -229,13 +233,18 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
     if (_disposed) {
       return;
     }
+    _resume_pending = false;
     _logStreamState('stop_requested');
     _bufferingDelayTimer?.cancel();
     _cancelSecondaryStart();
     _dumpController.forceStopIfNeeded('stop', notifyStateChanged: false);
     if (!_streamStarted && !_secondaryStreamStarted) {
-      _primaryStream.stop();
-      _secondaryStream?.stop();
+      if (_stop_operation == null) {
+        _stop_operation = _stopAllPlayers();
+        unawaited(_stop_operation!.catchError((Object error, StackTrace stack) {
+          Logging.e(_tag, '[stop] failed: $error\n$stack');
+        }));
+      }
       _logStreamState('stop_skipped', extra: 'reason=already_stopped');
       _chatSession.stopOnPause();
       _setStateIfMounted(() {
@@ -247,7 +256,10 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
       return;
     }
 
-    _stopAllPlayers();
+    _stop_operation = _stopAllPlayers();
+    unawaited(_stop_operation!.catchError((Object error, StackTrace stack) {
+      Logging.e(_tag, '[stop] failed: $error\n$stack');
+    }));
     _logStreamState('stop_applied', extra: 'caller=stop');
     _chatSession.stopOnPause();
     _setStateIfMounted(() {
@@ -256,6 +268,30 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
       _videoCapturing = false;
       _resetRecordElapsedState();
     });
+  }
+
+  Future<void> _resume_after_stop(Future<void> stop_operation) async {
+    try {
+      await stop_operation;
+      final resume = _resume_pending;
+      _resume_pending = false;
+      if (resume && mounted && !_disposed && widget.active) start();
+    } catch (error, stack) {
+      _resume_pending = false;
+      Logging.e(_tag, '[resume_after_stop] failed: $error\n$stack');
+    }
+  }
+
+  Future<void> _close_session() async {
+    try {
+      await (_stop_operation ?? _stopAllPlayers());
+      _chatSession.destroy();
+      await _disposeAllPlayers();
+      await _pipe.abolish_async();
+      await _pipe.destroy_async();
+    } catch (error, stack) {
+      Logging.e(_tag, '[close_session] failed: $error\n$stack');
+    }
   }
 
   @override
@@ -1094,7 +1130,7 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
     _secondaryStartTimer = null;
   }
 
-  void _stopAllPlayers() {
+  Future<void> _stopAllPlayers() async {
     _logStreamState('stop_all_players');
     _bufferingDelayTimer?.cancel();
     _cancelSecondaryStart();
@@ -1105,26 +1141,30 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
     _streamStarted = false;
     _secondaryStreamStarted = false;
     _primaryPlaybackReadyNotified = false;
-    _playerCamera0.stop();
-    if (_secondaryStream == null) {
-      _playerCamera1?.stop();
-      _playerCamera2?.stop();
-      _playerCamera3?.stop();
-    } else if (secondaryWasStarted) {
-      _playerCamera1?.stop();
+    try {
+      await _playerCamera0.stop_async();
+      if (_secondaryStream == null) {
+        await _playerCamera1?.stop_async();
+        await _playerCamera2?.stop_async();
+        await _playerCamera3?.stop_async();
+      } else if (secondaryWasStarted) {
+        await _playerCamera1?.stop_async();
+      }
+      await _primaryStream.stop_async();
+      await _secondaryStream?.stop_async();
+    } finally {
+      _stop_operation = null;
     }
-    _primaryStream.stop();
-    _secondaryStream?.stop();
   }
 
-  void _disposeAllPlayers() {
+  Future<void> _disposeAllPlayers() async {
     _logStreamState('dispose_all_players');
-    _playerCamera3?.destroy();
-    _playerCamera1?.destroy();
-    _playerCamera2?.destroy();
-    _playerCamera0.destroy();
-    _primaryStream.destroy();
-    _secondaryStream?.destroy();
+    await _playerCamera3?.destroy_async();
+    await _playerCamera1?.destroy_async();
+    await _playerCamera2?.destroy_async();
+    await _playerCamera0.destroy_async();
+    await _primaryStream.destroy_async();
+    await _secondaryStream?.destroy_async();
   }
 
   void _prepareMediaChat() {
@@ -1157,7 +1197,7 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
       _connectionState = state.name;
       _logStreamState('pipe_state', extra: 'state=${state.name}');
       if (state == PipeState.established) {
-        if (widget.active && !_streamStarted) {
+        if (widget.active && !_streamStarted && _stop_operation == null) {
           _startPrimaryPlayback(caller: 'pipe_established');
         }
 

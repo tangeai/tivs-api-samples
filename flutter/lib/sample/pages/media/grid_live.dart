@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 part of '../rapid_kit_sample_pages.dart';
 
 class _GridLiveItemWidget extends StatefulWidget {
@@ -24,6 +25,9 @@ class _GridLiveItemWidgetState extends State<_GridLiveItemWidget> {
   bool _isVisible = false;
   bool _isRendering = false;
   bool _establishFailed = false;
+  bool _closing = false;
+  bool _resume_pending = false;
+  Future<void>? _stop_operation;
 
   @override
   void initState() {
@@ -33,13 +37,21 @@ class _GridLiveItemWidgetState extends State<_GridLiveItemWidget> {
 
   @override
   void dispose() {
-    _player.stop();
-    _player.destroy();
-    _liveStream.stop();
-    _liveStream.destroy();
-    _pipe.abolish();
-    _pipe.destroy();
+    _closing = true;
+    unawaited(_close_session());
     super.dispose();
+  }
+
+  Future<void> _close_session() async {
+    try {
+      await (_stop_operation ?? _stop_playback());
+      await _player.destroy_async();
+      await _liveStream.destroy_async();
+      await _pipe.abolish_async();
+      await _pipe.destroy_async();
+    } catch (error, stack) {
+      Logging.e('GridLive', '[close_session] failed: $error\n$stack');
+    }
   }
 
   void setVisible(bool visible) {
@@ -49,6 +61,14 @@ class _GridLiveItemWidgetState extends State<_GridLiveItemWidget> {
   }
 
   void _startPlayback() {
+    if (_closing) return;
+    if (_stop_operation != null) {
+      if (!_resume_pending) {
+        _resume_pending = true;
+        unawaited(_resume_after_stop(_stop_operation!));
+      }
+      return;
+    }
     if (!_pipe.isEstablished) {
       _pipe.establish();
     }
@@ -57,8 +77,30 @@ class _GridLiveItemWidgetState extends State<_GridLiveItemWidget> {
   }
 
   void _stopPlayback() {
-    _liveStream.stop();
-    _player.stop();
+    _stop_operation ??= _stop_playback();
+    unawaited(_stop_operation!.catchError((Object error, StackTrace stack) {
+      Logging.e('GridLive', '[stop] failed: $error\n$stack');
+    }));
+  }
+
+  Future<void> _stop_playback() async {
+    try {
+      await _player.stop_async();
+      await _liveStream.stop_async();
+    } finally {
+      _stop_operation = null;
+    }
+  }
+
+  Future<void> _resume_after_stop(Future<void> stop_operation) async {
+    try {
+      await stop_operation;
+      _resume_pending = false;
+      if (mounted && !_closing && _isVisible) _startPlayback();
+    } catch (error, stack) {
+      _resume_pending = false;
+      Logging.e('GridLive', '[resume_after_stop] failed: $error\n$stack');
+    }
   }
 
   void _prepareComponents() {

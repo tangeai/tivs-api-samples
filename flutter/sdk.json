@@ -2,42 +2,42 @@
   "assets": [
     {
       "kind": "guides",
-      "name": "tivs-flutter-1.8.0-guides.zip",
-      "sha256": "aed95acc27219c06ef1ac8f1e0094d5d4bf90109d53160f6d2aab78ee095f9f4",
-      "size": 4015,
+      "name": "tivs-flutter-1.8.1-guides.zip",
+      "sha256": "035f216edc5197be7357b4241e68d2a96a3b7f97abaf388d33554b794759062a",
+      "size": 4009,
       "target": "all",
-      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0/tivs-flutter-1.8.0-guides.zip"
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.1/tivs-flutter-1.8.1-guides.zip"
     },
     {
       "kind": "hosted-package",
-      "name": "rapid_kit-1.8.0.tar.gz",
-      "sha256": "01c37b9e82dbd8383480ff3d63db408cf6d50388541669a443e59ce82537d5bb",
-      "size": 251977411,
+      "name": "rapid_kit-1.8.1.tar.gz",
+      "sha256": "26eda7c7751bbeb18d1b52d97b356e726a8032436f54c00b5c4bb887aead436b",
+      "size": 251985170,
       "target": "all",
-      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0/rapid_kit-1.8.0.tar.gz"
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.1/rapid_kit-1.8.1.tar.gz"
     },
     {
       "kind": "metadata",
       "name": "delivery.json",
-      "sha256": "357d2b7f13436c67efffa7829e50bfc09da91225f65ac38f39ef5a53c527d033",
+      "sha256": "6c152cd4eb70b826a464f9c18bfd0690855f4ae486fa77d58307d2dda88ce52b",
       "size": 550,
       "target": "all",
-      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0/delivery.json"
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.1/delivery.json"
     }
   ],
   "dependencies": {
     "3rd.lock": "269e53eaaa8cd0752aaa48d31eab22b1f11177c83d723fefc4b29822c152f970",
-    "flutter.pubspec.lock": "d472f75cec755454ec002b55f131752418c6fdf45801f6855faac7565568cce6"
+    "flutter.pubspec.lock": "7faea1b64fff0fba448a2d5630eacede9306627ca527500dc863f7dcc5195617"
   },
   "hosted": {
-    "archive_sha256": "01c37b9e82dbd8383480ff3d63db408cf6d50388541669a443e59ce82537d5bb",
-    "archive_url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0/rapid_kit-1.8.0.tar.gz",
+    "archive_sha256": "26eda7c7751bbeb18d1b52d97b356e726a8032436f54c00b5c4bb887aead436b",
+    "archive_url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.1/rapid_kit-1.8.1.tar.gz",
     "url": "https://tangeai.github.io/tivs-sdk-flutter-hosted",
-    "version": "1.8.0"
+    "version": "1.8.1"
   },
   "owner": "flutter",
-  "source_commit": "79670c7100935554050ae856bcb23f7db656982b",
-  "tag": "v1.8.0",
+  "source_commit": "3d44cc0bf804b9beb910ef665c3040d3b4cee901",
+  "tag": "v1.8.1",
   "targets": [
     "android-arm64",
     "ios-arm64",
@@ -48,5 +48,5 @@
     "linux-arm64"
   ],
   "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted",
-  "version": "1.8.0"
+  "version": "1.8.1"
 }

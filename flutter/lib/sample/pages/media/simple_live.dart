@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 part of '../rapid_kit_sample_pages.dart';
 
 /// 一个简单的直播播放页面
@@ -32,6 +33,9 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
 
   bool _rendering = false;
   bool _establishFailed = false;
+  bool _closing = false;
+  bool _resume_pending = false;
+  Future<void>? _stop_operation;
 
   @override
   Widget build(BuildContext context) => _scaffold(
@@ -88,6 +92,14 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
   /// 页面可见时启动播放
   @override
   void start() {
+    if (_closing) return;
+    if (_stop_operation != null) {
+      if (!_resume_pending) {
+        _resume_pending = true;
+        unawaited(_resume_after_stop(_stop_operation!));
+      }
+      return;
+    }
     // 恢复时尝试重新建立连接（P2P 可能会由于处于后台等原因被系统断开）
     if (!_pipe.isEstablished) {
       _pipe.establish();
@@ -99,31 +111,50 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
   /// 页面不可见时停止播放
   @override
   void stop() {
-    _liveStream.stop();
-    _player.stop();
+    _stop_operation ??= _stop_playback();
+    unawaited(_stop_operation!.catchError((Object error, StackTrace stack) {
+      Logging.e('SimpleLivePage', '[stop] failed: $error\n$stack');
+    }));
+  }
+
+  Future<void> _stop_playback() async {
+    try {
+      await _player.stop_async();
+      await _liveStream.stop_async();
+    } finally {
+      _stop_operation = null;
+    }
+  }
+
+  Future<void> _resume_after_stop(Future<void> stop_operation) async {
+    try {
+      await stop_operation;
+      _resume_pending = false;
+      if (mounted && !_closing && isResumed) start();
+    } catch (error, stack) {
+      _resume_pending = false;
+      Logging.e('SimpleLivePage', '[resume_after_stop] failed: $error\n$stack');
+    }
+  }
+
+  Future<void> _close_session() async {
+    try {
+      await (_stop_operation ?? _stop_playback());
+      await _player.destroy_async();
+      await _liveStream.destroy_async();
+      await _pipe.abolish_async();
+      await _pipe.destroy_async();
+    } catch (error, stack) {
+      Logging.e('SimpleLivePage', '[close_session] failed: $error\n$stack');
+    }
   }
 
   /// 退出页面的时候，销毁清理资源
   @override
   void dispose() {
+    _closing = true;
+    unawaited(_close_session());
     super.dispose();
-
-    // 下方资源存在依赖关系： player -> liveStream -> pipe，
-    // 请注意释放顺序，确保安全释放
-    // 顺序错乱将导致底层指针失效，造成闪退
-
-    // 1. 先停止和销毁播放器
-    _player.stop();
-    _player.destroy();
-
-    // 2. 再停止和销毁直播流
-    _liveStream.stop();
-    _liveStream.destroy();
-
-    // 3. 最后断开和销毁 P2P
-    _pipe.abolish();
-    _pipe.destroy();
-
     WidgetsBinding.instance.removeObserver(this);
   }
 
@@ -133,6 +164,7 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
     // IMPORTANT: Only use TCP mode (1) when remote device explicitly supports it and there is a clear requirement
     _pipe.setTransportMode(SampleConstants.tgrtcTcpModeEnabled ? 1 : 0);
     _pipe.listen((state) {
+      if (!mounted || _closing) return;
       if (state == PipeState.established) {
         // 连接建立成功，可在此发送指令等
       } else if (state == PipeState.failed) {
@@ -161,6 +193,7 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
     // 3. 初始化 Player
     _player = _createSamplePlayer(live: true);
     _player.onRenderState = (state) {
+      if (!mounted || _closing) return;
       setState(() => _rendering = state != RenderState.buffering);
     };
 

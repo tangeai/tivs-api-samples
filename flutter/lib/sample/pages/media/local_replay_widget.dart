@@ -268,14 +268,27 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
 
     _stream.destroy();
 
-    _releasePipe('dispose');
-    _pipe.destroy();
+    unawaited(_close_pipe());
 
     for (final controller in _frameHoldControllers) {
       controller.dispose();
     }
 
     super.dispose();
+  }
+
+  // ignore: non_constant_identifier_names
+  Future<void> _close_pipe() async {
+    try {
+      _log('pipe.abolish reason=dispose owned=$_pipeOwned '
+          'state=${_pipe.currentState()}');
+      _pipeOwned = false;
+      _establishRequested = false;
+      await _pipe.abolish_async();
+      await _pipe.destroy_async();
+    } catch (error, stack) {
+      Logging.e(_tag, '[close_pipe] failed: $error\n$stack');
+    }
   }
 
   @override
