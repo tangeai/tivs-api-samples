@@ -83,9 +83,10 @@ class _GridLiveItemWidgetState extends State<_GridLiveItemWidget> {
             widget.deviceAbilities);
     _liveStream =
         LiveStream.createPrimary(_pipe, enableAudio: streamAudioEnabled);
+    _liveStream.enableDebugging(SampleConstants.streamDebuggingEnabled);
     _liveStream.highQuality();
 
-    _player = _createSamplePlayer();
+    _player = _createSamplePlayer(live: true);
     _player.onRenderState = (state) {
       if (!mounted) return;
       setState(() => _isRendering = state != RenderState.buffering);

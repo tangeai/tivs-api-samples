@@ -77,6 +77,8 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
   static const Duration _seekDebounceDelay = Duration(milliseconds: 350);
   static const Duration _transitionUiTimeout = Duration(seconds: 20);
   static const Duration _aovTransitionUiTimeout = Duration(seconds: 90);
+  static const Duration _downloadIdleTimeout = Duration(seconds: 30);
+  static const Duration _aovDownloadIdleTimeout = Duration(seconds: 120);
 
   late String _deviceId;
   late String _deviceName;
@@ -105,6 +107,7 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
   List<LocalReplayCapture> _downloadCaptures = <LocalReplayCapture>[];
   final Set<int> _completedDownloadCameras = <int>{};
   final Map<int, double> _downloadProgress = <int, double>{};
+  Timer? _downloadIdleTimer;
   bool _isDownloading = false;
   Pipe? _downloadStartingPipe;
   bool _downloadStreamStarted = false;
@@ -636,6 +639,7 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
         downloadPipe,
         enableAudio: _streamAudioEnabled,
       );
+      downloadStream.enableDebugging(SampleConstants.streamDebuggingEnabled);
       if (!_isActiveDownloadSession(downloadPipe)) {
         downloadStream.destroy();
         return;
@@ -678,6 +682,7 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
       downloadStream.start();
       _downloadStreamStarted = true;
       downloadStream.setSpeed(LocalReplaySpeed.x4);
+      _resetDownloadIdleTimer(downloadPipe);
     } catch (error) {
       _log('[download] export setup failed, error=$error');
       _failDownload(
@@ -716,6 +721,9 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
     };
     capture.onProgress = (progress) {
       if (!mounted || !_isActiveDownloadSession(downloadPipe)) return;
+      if (progress > (_downloadProgress[cameraIndex] ?? -1)) {
+        _resetDownloadIdleTimer(downloadPipe);
+      }
       _downloadProgress[cameraIndex] = progress;
       final total = _downloadProgress.values.fold<double>(
             0,
@@ -731,6 +739,16 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
 
   bool _isActiveDownloadSession(Pipe downloadPipe) =>
       _isDownloading && identical(_downloadPipe, downloadPipe);
+
+  void _resetDownloadIdleTimer(Pipe downloadPipe) {
+    _downloadIdleTimer?.cancel();
+    _downloadIdleTimer = Timer(
+        _isAovDevice ? _aovDownloadIdleTimeout : _downloadIdleTimeout, () {
+      if (!_isActiveDownloadSession(downloadPipe)) return;
+      _log('[download] idle timeout, progress=$_totalDownloadProgress');
+      _failDownload('Video download timed out', downloadPipe: downloadPipe);
+    });
+  }
 
   void _completeDownload(Pipe downloadPipe) {
     if (!mounted || !_isActiveDownloadSession(downloadPipe)) return;
@@ -769,6 +787,8 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
   }
 
   void _disposeDownloadSession() {
+    _downloadIdleTimer?.cancel();
+    _downloadIdleTimer = null;
     for (final capture in _downloadCaptures) {
       capture.stop();
     }
@@ -1042,6 +1062,7 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
 
     _log('prepare_components, streamAudioEnabled=$_streamAudioEnabled');
     _stream = LocalReplayStream.create(_pipe, enableAudio: _streamAudioEnabled);
+    _stream.enableDebugging(SampleConstants.streamDebuggingEnabled);
     _stream.onSeekError = _onSeekError;
     final providerPtr = _stream.provider(cameraIndex: 0)!;
 

@@ -97,6 +97,10 @@ class RapidInitialize {
       clockMode = SampleConstants.clockMode;
     }
     SampleConstants.clockMode = clockMode;
+    if (bufferingMode == PlayerBufferingMode.smooth.index) {
+      clockMode = PlayerClockMode.video.index;
+      SampleConstants.clockMode = clockMode;
+    }
     Player.setDefaultClockMode(PlayerClockMode.values[clockMode]);
 
     int videoDecoderPreference = await SharedPreferencesUtil.instance.getInt(
@@ -113,6 +117,9 @@ class RapidInitialize {
         debugging: runtimeLoggingEnable,
         environment: Environment.values[apiEnv]));
 
+    if (initialized && bufferingMode == PlayerBufferingMode.smooth.index) {
+      if (!await RapidKit.setTransportJitterDelay(0)) return false;
+    }
     if (initialized) await WifiAbility.set_network_logging_enabled(true);
     return initialized;
   }

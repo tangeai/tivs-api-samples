@@ -276,8 +276,8 @@ class _HomePageState extends LifecycleAwareState<HomePage> {
     final localStreamDebugging = await SharedPreferencesUtil.instance
             .getInt(SampleConstants.storageKeyAppConfigStreamDebugging) ??
         SampleConstants.switchOffValue;
-    RapidDiagnostics.enableStreamDebugging(
-        localStreamDebugging == SampleConstants.switchOnValue);
+    SampleConstants.streamDebuggingEnabled =
+        localStreamDebugging == SampleConstants.switchOnValue;
 
     final response =
         await SpecService.primaryByPage(_deviceBasicInfoList.length);

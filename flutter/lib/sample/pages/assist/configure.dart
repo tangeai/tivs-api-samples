@@ -145,8 +145,10 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
       _tgrtcTcpModeWidget(),
       _streamDebuggingWidget(),
       _pureAudioModeWidget(),
-      _bufferingModeWidget(),
-      _clockModeWidget(),
+      if (_bufferingModeValue.contains(_bufferingMode)) ...[
+        _bufferingModeWidget(),
+        _clockModeWidget(),
+      ],
       _videoDecoderPreferenceWidget(),
     ];
 
@@ -253,7 +255,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
       constraints: const BoxConstraints(maxWidth: 400.0),
       child: TextField(
         controller: _fixedBufferingMsController,
-        decoration: _buildInputDecoration("Fixed buffer (ms)"),
+        decoration: _buildInputDecoration("\u56fa\u5b9a\u7f13\u51b2\u533a\u65f6\u957f\uff08\u6beb\u79d2\uff09"),
         keyboardType: TextInputType.number,
         style: const TextStyle(
           fontSize: 14.0,
@@ -460,8 +462,8 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
                     SharedPreferencesUtil.instance.setInt(
                         SampleConstants.storageKeyAppConfigStreamDebugging,
                         _streamDebugging);
-                    RapidDiagnostics.enableStreamDebugging(
-                        interval == SampleConstants.switchOnValue);
+                    SampleConstants.streamDebuggingEnabled =
+                        interval == SampleConstants.switchOnValue;
                     Navigator.pop(context);
                   },
                 ),
@@ -648,6 +650,14 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
   }
 
   void _onSubmit() async {
+    if (_bufferingMode == PlayerBufferingMode.smooth.index) {
+      _clockMode = PlayerClockMode.video.index;
+      if ((int.tryParse(_fixedBufferingMsController.text.trim()) ?? 0) < 100) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Smooth buffer requires at least 100 ms')));
+        return;
+      }
+    }
     if (_idController.text.isEmpty) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('请输入 APP ID')));
@@ -657,7 +667,8 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
     final fixedBufferingMs =
         int.tryParse(_fixedBufferingMsController.text.trim()) ??
             SampleConstants.fixedBufferingMs;
-    if (_bufferingMode == PlayerBufferingMode.fixed.index &&
+    if ((_bufferingMode == PlayerBufferingMode.fixed.index ||
+            _bufferingMode == PlayerBufferingMode.smooth.index) &&
         fixedBufferingMs <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Fixed buffer must be greater than 0 ms')));

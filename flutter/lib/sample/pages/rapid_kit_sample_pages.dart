@@ -17,8 +17,6 @@ import 'media/cloud_replay_time_zone.dart';
 export 'media/cloud_replay_time_zone.dart';
 import '../../../configure.dart';
 import 'package:rapid_kit/rapid_kit.dart';
-// ignore: implementation_imports
-import 'package:rapid_kit/src/internal/diagnostics.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:async';
@@ -92,8 +90,14 @@ part 'media/grid_live.dart';
 
 const int _sampleAutoBufferingMaxMs = 800;
 
-Player _createSamplePlayer() {
+Player _createSamplePlayer({bool live = false}) {
   final player = Player.create();
+  if (SampleConstants.bufferingMode == PlayerBufferingMode.smooth.index) {
+    player.setBufferingMode(live ? PlayerBufferingMode.smooth : PlayerBufferingMode.auto,
+        bufferingMs: SampleConstants.fixedBufferingMs);
+    player.setClockMode(live ? PlayerClockMode.video : PlayerClockMode.audio);
+    if (live) player.setVideoDecoderPreference(VideoDecoderPreference.hardware);
+  }
   player.setAutoBufferingMaxMs(_sampleAutoBufferingMaxMs);
   return player;
 }

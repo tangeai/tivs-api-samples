@@ -1,6 +1,7 @@
 part of 'rapid_kit_sample_configure.dart';
 
 class SampleConstants {
+  static bool streamDebuggingEnabled = false;
   static const String defaultRapidAppID = String.fromEnvironment('RAPID_APP_ID');
   static const String defaultRapidPackageName =
       String.fromEnvironment('RAPID_PACKAGE_NAME');
@@ -69,9 +70,9 @@ class SampleConstants {
   static bool intercom16kSamplingEnabled = false;
   static bool tgrtcTcpModeEnabled = false;
   static bool pureAudioModeEnabled = false;
-  static int bufferingMode = 1;
-  static int fixedBufferingMs = 200;
-  static int clockMode = 0;
+  static int bufferingMode = Platform.isAndroid ? 4 : 1;
+  static int fixedBufferingMs = Platform.isAndroid ? 1500 : 200;
+  static int clockMode = Platform.isAndroid ? 1 : 0;
   static int videoDecoderPreference =
       RapidSampleConfigure.videoDecoderPreferenceDefault.index;
   static int? _runtimeVideoDecoderPreferenceOverride;

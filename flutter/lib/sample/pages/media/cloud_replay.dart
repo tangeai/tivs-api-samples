@@ -949,11 +949,13 @@ class _CloudReplayPageState extends LifecycleAwareState<CloudReplayPage>
 
   void _preparePlayer() {
     _stream = CloudReplayStream.create(_deviceId);
+    _stream.enableDebugging(SampleConstants.streamDebuggingEnabled);
     _stream.onChunkNotFound = (timestampS) {
       // handle chunk not found
     };
 
     _streamOfDownload = CloudReplayStream.create(_deviceId);
+    _streamOfDownload.enableDebugging(SampleConstants.streamDebuggingEnabled);
     _streamOfDownload.onComplete = () {
       if (!mounted || !_isDownloading) return;
       Logging.i(

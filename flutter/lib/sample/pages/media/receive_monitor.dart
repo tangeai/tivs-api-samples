@@ -90,7 +90,9 @@ class ReceiveMonitorState extends State<ReceiveMonitorPage>
   void _begin_streams() {
     if (_primary != null) return;
     _primary = LiveStream.createPrimary(_pipe, enableAudio: _audio_enabled);
+    _primary?.enableDebugging(SampleConstants.streamDebuggingEnabled);
     if (widget.cameraCount == 2) _secondary = LiveStream.createSecondary(_pipe);
+    _secondary?.enableDebugging(SampleConstants.streamDebuggingEnabled);
     for (var camera = 0; camera < widget.cameraCount; camera++) {
       if (_stream_for(camera)?.receive_metrics(cameraIndex: camera) == null) {
         _stop_monitor();

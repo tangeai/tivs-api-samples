@@ -153,12 +153,13 @@ class _SimpleLivePageState extends LifecycleAwareState<SimpleLivePage> {
             widget.deviceAbilities);
     _liveStream =
         LiveStream.createPrimary(_pipe, enableAudio: streamAudioEnabled);
+    _liveStream.enableDebugging(SampleConstants.streamDebuggingEnabled);
 
     // 按需设置清晰度，如 高清
     _liveStream.highQuality();
 
     // 3. 初始化 Player
-    _player = _createSamplePlayer();
+    _player = _createSamplePlayer(live: true);
     _player.onRenderState = (state) {
       setState(() => _rendering = state != RenderState.buffering);
     };

@@ -10,6 +10,7 @@ Future<void> accept_sample_privacy_if_needed(WidgetTester tester) async {
   while (DateTime.now().isBefore(deadline)) {
     await tester.pump(const Duration(milliseconds: 100));
     if (gate.evaluate().isEmpty) return;
+    if (accept.evaluate().isEmpty) continue;
     final button = tester.widget<ElevatedButton>(accept);
     if (button.onPressed == null) continue;
     await tester.tap(accept);

@@ -43,7 +43,7 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
   Map<String, dynamic>? _features;
   bool _abilitiesQueryInFlight = false;
 
-  bool _isHighQuality = false;
+  bool _isHighQuality = true;
 
   late Pipe _pipe;
 
@@ -1177,12 +1177,12 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
 
   void _prepareMultiplePlayers() {
     _log('prepare_multiple_players');
-    _playerCamera0 = _createSamplePlayer();
+    _playerCamera0 = _createSamplePlayer(live: true);
     _configurePlayerVideoMode(_playerCamera0);
     _configurePlayerRenderState(_playerCamera0, 0, primary: true);
 
     if (!_pureAudioMode && _cameraCount >= 2) {
-      _playerCamera1 = _createSamplePlayer();
+      _playerCamera1 = _createSamplePlayer(live: true);
       _configurePlayerVideoMode(_playerCamera1!);
       _configurePlayerRenderState(_playerCamera1!, 1);
       _playerCamera1!.bindingPrimaryPlayer(_playerCamera0);
@@ -1190,7 +1190,7 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
     }
 
     if (!_pureAudioMode && _cameraCount >= 3) {
-      _playerCamera2 = _createSamplePlayer();
+      _playerCamera2 = _createSamplePlayer(live: true);
       _configurePlayerVideoMode(_playerCamera2!);
       _configurePlayerRenderState(_playerCamera2!, 2);
       _playerCamera2!.bindingPrimaryPlayer(_playerCamera0);
@@ -1207,6 +1207,7 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
 
     _primaryStream =
         LiveStream.createPrimary(_pipe, enableAudio: _streamAudioEnabled);
+    _primaryStream.enableDebugging(SampleConstants.streamDebuggingEnabled);
     final provider = _primaryStream.provider();
     if (provider != null) {
       _playerCamera0.prepare(provider);
@@ -1214,6 +1215,7 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
 
     if (!_pureAudioMode && _cameraCount == 2) {
       _secondaryStream = LiveStream.createSecondary(_pipe);
+      _secondaryStream?.enableDebugging(SampleConstants.streamDebuggingEnabled);
       final provider1 = _secondaryStream!.provider(cameraIndex: 1);
       if (provider1 != null) _playerCamera1!.prepare(provider1);
     }

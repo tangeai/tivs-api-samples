@@ -46,6 +46,13 @@ android {
             ndk.abiFilters.clear()
             ndk.abiFilters.addAll(listOf("arm64-v8a"))            
         }
+        getByName("profile") {
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks.clear()
+            matchingFallbacks.add("release")
+            ndk.abiFilters.clear()
+            ndk.abiFilters.add("arm64-v8a")
+        }
     }
 }
 
