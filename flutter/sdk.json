@@ -1,0 +1,60 @@
+{
+  "assets": [
+    {
+      "kind": "package",
+      "name": "rapid_kit-1.8.0-alpha.14.zip",
+      "sha256": "3fcd69ac5e6d3a45ea2300cc9673d606a473b8e04e295f60aabbe3f306d42d5e",
+      "size": 250629459,
+      "target": "all",
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0-alpha.14/rapid_kit-1.8.0-alpha.14.zip"
+    },
+    {
+      "kind": "guides",
+      "name": "tivs-flutter-1.8.0-alpha.14-guides.zip",
+      "sha256": "a7b47739666453eae81011749933f53b1f0ce36384dd403e544f262a658aca43",
+      "size": 4065,
+      "target": "all",
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0-alpha.14/tivs-flutter-1.8.0-alpha.14-guides.zip"
+    },
+    {
+      "kind": "hosted-package",
+      "name": "rapid_kit-1.8.0-alpha.14.tar.gz",
+      "sha256": "ea90ea64e324031f9dd4475621e6fb7e9b1ea1bc0f845d901479942373a49222",
+      "size": 249321826,
+      "target": "all",
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0-alpha.14/rapid_kit-1.8.0-alpha.14.tar.gz"
+    },
+    {
+      "kind": "metadata",
+      "name": "delivery.json",
+      "sha256": "88b267d4a86bf3831725a3bb60942ede3cdd15989bb39e4676efc4ce1a1a3adb",
+      "size": 812,
+      "target": "all",
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0-alpha.14/delivery.json"
+    }
+  ],
+  "dependencies": {
+    "3rd.lock": "269e53eaaa8cd0752aaa48d31eab22b1f11177c83d723fefc4b29822c152f970",
+    "flutter.pubspec.lock": "8989d7866f59215cc679c1b54fd418edc876dd16a78b3a4088c2ab3a71519f3a"
+  },
+  "hosted": {
+    "archive_sha256": "ea90ea64e324031f9dd4475621e6fb7e9b1ea1bc0f845d901479942373a49222",
+    "archive_url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.0-alpha.14/rapid_kit-1.8.0-alpha.14.tar.gz",
+    "url": "https://tangeai.github.io/tivs-sdk-flutter-hosted",
+    "version": "1.8.0-alpha.14"
+  },
+  "owner": "flutter",
+  "source_commit": "fbf8debf58ede8140b5cb7a46e995b01d129132f",
+  "tag": "v1.8.0-alpha.14",
+  "targets": [
+    "android-arm64",
+    "ios-arm64",
+    "macos-arm64",
+    "ohos-arm64",
+    "windows-x64",
+    "linux-x64",
+    "linux-arm64"
+  ],
+  "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted",
+  "version": "1.8.0-alpha.14"
+}
