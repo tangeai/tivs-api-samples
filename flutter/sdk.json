@@ -2,42 +2,42 @@
   "assets": [
     {
       "kind": "guides",
-      "name": "tivs-flutter-1.8.2-alpha.2-guides.zip",
-      "sha256": "7ed7471b93b2909ce387788ac771bb0d88972d8b12eb434f294d736efbb272a5",
-      "size": 4031,
+      "name": "tivs-flutter-1.9.0-alpha.4-guides.zip",
+      "sha256": "ec3f96cdd207c646f9906f65e85ce61e4185e7d792514885c68eb78cf50563f7",
+      "size": 4034,
       "target": "all",
-      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.2-alpha.2/tivs-flutter-1.8.2-alpha.2-guides.zip"
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.9.0-alpha.4/tivs-flutter-1.9.0-alpha.4-guides.zip"
     },
     {
       "kind": "hosted-package",
-      "name": "rapid_kit-1.8.2-alpha.2.tar.gz",
-      "sha256": "b7a6014e1b27800662971d56b9efc9ee15cc70a8d567b52c7cb1601f84fd2b80",
-      "size": 252304856,
+      "name": "rapid_kit-1.9.0-alpha.4.tar.gz",
+      "sha256": "e803a27b3e4f52bdd580900e4cf9cc6bd5594e0ef8a1112aaa0fd18a886c1c9a",
+      "size": 252308348,
       "target": "all",
-      "url": "https://icam-media-cloud-user-public.oss-cn-shenzhen.aliyuncs.com/RAPID_RELEASE/sdk/flutter/v1.8.2-alpha.2/rapid_kit-1.8.2-alpha.2.tar.gz"
+      "url": "https://icam-media-cloud-user-public.oss-cn-shenzhen.aliyuncs.com/RAPID_RELEASE/sdk/flutter/v1.9.0-alpha.4/rapid_kit-1.9.0-alpha.4.tar.gz"
     },
     {
       "kind": "metadata",
       "name": "delivery.json",
-      "sha256": "0283172f1493fa514932b4acb8b4db4582bebc2be084f926fb29a814ebd00415",
+      "sha256": "c28660d8972250420f0f40d1313a93b8b34194748150321df19ec4ac1be71305",
       "size": 770,
       "target": "all",
-      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.8.2-alpha.2/delivery.json"
+      "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted/releases/download/v1.9.0-alpha.4/delivery.json"
     }
   ],
   "dependencies": {
     "3rd.lock": "269e53eaaa8cd0752aaa48d31eab22b1f11177c83d723fefc4b29822c152f970",
-    "flutter.pubspec.lock": "adb6df73300afa1e6cc9c3b39e22431d8a19b4c5c0a4f87d90fbed26634109a2"
+    "flutter.pubspec.lock": "92ee26e49716660afa54cda129a0616dc262ad0f14497ddd5be8fedadabc9bf9"
   },
   "hosted": {
-    "archive_sha256": "b7a6014e1b27800662971d56b9efc9ee15cc70a8d567b52c7cb1601f84fd2b80",
-    "archive_url": "https://icam-media-cloud-user-public.oss-cn-shenzhen.aliyuncs.com/RAPID_RELEASE/sdk/flutter/v1.8.2-alpha.2/rapid_kit-1.8.2-alpha.2.tar.gz",
+    "archive_sha256": "e803a27b3e4f52bdd580900e4cf9cc6bd5594e0ef8a1112aaa0fd18a886c1c9a",
+    "archive_url": "https://icam-media-cloud-user-public.oss-cn-shenzhen.aliyuncs.com/RAPID_RELEASE/sdk/flutter/v1.9.0-alpha.4/rapid_kit-1.9.0-alpha.4.tar.gz",
     "url": "https://tangeai.github.io/tivs-sdk-flutter-hosted",
-    "version": "1.8.2-alpha.2"
+    "version": "1.9.0-alpha.4"
   },
   "owner": "flutter",
-  "source_commit": "6fb6aeb0d602b1338f98034bdf33ef5be53254e4",
-  "tag": "v1.8.2-alpha.2",
+  "source_commit": "f531060d6b600ff724964d4eb061a693d8b17732",
+  "tag": "v1.9.0-alpha.4",
   "targets": [
     "android-arm64",
     "ios-arm64",
@@ -48,5 +48,5 @@
     "linux-arm64"
   ],
   "url": "https://github.com/tangeai/tivs-sdk-flutter-hosted",
-  "version": "1.8.2-alpha.2"
+  "version": "1.9.0-alpha.4"
 }
