@@ -251,10 +251,10 @@ packages:
     dependency: "direct main"
     description:
       name: rapid_kit
-      sha256: "ea90ea64e324031f9dd4475621e6fb7e9b1ea1bc0f845d901479942373a49222"
+      sha256: "15877550115795ff5b948e4b146f16013f61b8cd93fb5aa5062d18ad6a6abda8"
       url: "https://tangeai.github.io/tivs-sdk-flutter-hosted"
     source: hosted
-    version: "1.8.0-alpha.14"
+    version: "1.8.0-alpha.15"
   sky_engine:
     dependency: transitive
     description: flutter

@@ -1,6 +1,6 @@
 # Public API index
 
-SDK version: `1.8.0-alpha.14`. Installation and consumer checks are in `README.md`; exact assets are in `sdk.json`.
+SDK version: `1.8.0-alpha.15`. Installation and consumer checks are in `README.md`; exact assets are in `sdk.json`.
 
 Import `package:rapid_kit/rapid_kit.dart`. These declaration libraries ship inside the exact Git package; their public types and methods define the Dart API.
 
