@@ -110,6 +110,14 @@ class RapidInitialize {
         SampleConstants.resolveVideoDecoderPreference(videoDecoderPreference);
     SampleConstants.applyVideoDecoderPreference(videoDecoderPreference);
 
+    final recordVideoCodec = await SharedPreferencesUtil.instance
+            .getInt(SampleConstants.storageKeyAppConfigRecordVideoCodec) ??
+        RecordVideoCodec.source.index;
+    SampleConstants.recordVideoCodec = recordVideoCodec >= 0 &&
+            recordVideoCodec < RecordVideoCodec.values.length
+        ? RecordVideoCodec.values[recordVideoCodec]
+        : RecordVideoCodec.source;
+
     final initialized = await RapidKit.initialize(Configurations(
         id: appId,
         package: packageName,

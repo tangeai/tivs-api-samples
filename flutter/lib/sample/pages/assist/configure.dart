@@ -19,6 +19,8 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
   final _clockModeName = ["音频主时钟", "视频主时钟"];
   final _videoDecoderPreferenceValue = [0, 1, 2];
   final _videoDecoderPreferenceName = ["自动选择", "软件解码", "硬件解码"];
+  final _recordVideoCodecValue = [0, 1];
+  final _recordVideoCodecName = ["跟随原视频", "固定 H.264"];
 
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _packageNameController = TextEditingController();
@@ -38,6 +40,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
   int _bufferingMode = SampleConstants.bufferingMode;
   int _clockMode = SampleConstants.clockMode;
   int _videoDecoderPreference = SampleConstants.videoDecoderPreference;
+  int _recordVideoCodec = SampleConstants.recordVideoCodec.index;
 
   @override
   void initState() {
@@ -150,6 +153,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
         _clockModeWidget(),
       ],
       _videoDecoderPreferenceWidget(),
+      _recordVideoCodecWidget(),
     ];
 
     return DecoratedBox(
@@ -277,6 +281,12 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
         _onPickVideoDecoderPreference);
   }
 
+  Widget _recordVideoCodecWidget() {
+    return _configRow('录制视频编码', _recordVideoCodecName[_recordVideoCodec],
+        _onPickRecordVideoCodec,
+        subtitle: '固定 H.264 时，H.265 原视频也会录制为 H.264 MP4');
+  }
+
   void _onPickBufferingMode() {
     showModalBottomSheet(
       backgroundColor: Colors.white,
@@ -369,6 +379,37 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
                         _videoDecoderPreference);
                     SampleConstants.applyVideoDecoderPreference(
                         _videoDecoderPreference);
+                    Navigator.pop(context);
+                  },
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  void _onPickRecordVideoCodec() {
+    showModalBottomSheet(
+      backgroundColor: Colors.white,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Wrap(
+            children: _recordVideoCodecValue.map((int codec) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                child: ListTile(
+                  title: Text(_recordVideoCodecName[codec]),
+                  onTap: () async {
+                    setState(() => _recordVideoCodec = codec);
+                    await SharedPreferencesUtil.instance.setInt(
+                        SampleConstants.storageKeyAppConfigRecordVideoCodec,
+                        codec);
+                    SampleConstants.recordVideoCodec =
+                        RecordVideoCodec.values[codec];
                     Navigator.pop(context);
                   },
                 ),
@@ -716,6 +757,8 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
     SharedPreferencesUtil.instance.setInt(
         SampleConstants.storageKeyAppConfigVideoDecoderPreference,
         _videoDecoderPreference);
+    SharedPreferencesUtil.instance.setInt(
+        SampleConstants.storageKeyAppConfigRecordVideoCodec, _recordVideoCodec);
 
     final ret = await RapidInitialize.init();
 
@@ -923,6 +966,16 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
     localVideoDecoderPreference = SampleConstants.resolveVideoDecoderPreference(
         localVideoDecoderPreference);
 
+    int localRecordVideoCodec = await SharedPreferencesUtil.instance
+            .getInt(SampleConstants.storageKeyAppConfigRecordVideoCodec) ??
+        RecordVideoCodec.source.index;
+    if (localRecordVideoCodec < 0 ||
+        localRecordVideoCodec >= RecordVideoCodec.values.length) {
+      localRecordVideoCodec = RecordVideoCodec.source.index;
+    }
+    SampleConstants.recordVideoCodec =
+        RecordVideoCodec.values[localRecordVideoCodec];
+
     if (localAppId?.isNotEmpty == true) {
       _appId = localAppId!;
     } else {
@@ -953,6 +1006,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
       _bufferingMode = localBufferingMode;
       _clockMode = localClockMode;
       _videoDecoderPreference = localVideoDecoderPreference;
+      _recordVideoCodec = localRecordVideoCodec;
       _idController.text = _appId;
       _packageNameController.text = _packageName;
       _fixedBufferingMsController.text = localFixedBufferingMs.toString();

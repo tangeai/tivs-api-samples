@@ -409,7 +409,8 @@ class _LocalReplayWidgetState extends State<LocalReplayWidget>
 
     _videoRecording = !_videoRecording;
     if (_videoRecording) {
-      final ret = await _player.startRecord();
+      final ret = await _player.startRecord(
+          videoCodec: SampleConstants.recordVideoCodec);
       SnackTips.show(context, ret ? "开始录像..." : "录像失败");
     } else {
       final ret = await _player.stopRecord();

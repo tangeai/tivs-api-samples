@@ -47,7 +47,7 @@ android {
             ndk.abiFilters.addAll(listOf("arm64-v8a"))            
         }
         getByName("profile") {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("rapid_kit") ?: signingConfigs.getByName("debug")
             matchingFallbacks.clear()
             matchingFallbacks.add("release")
             ndk.abiFilters.clear()
