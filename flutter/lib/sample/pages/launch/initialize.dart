@@ -110,13 +110,10 @@ class RapidInitialize {
         SampleConstants.resolveVideoDecoderPreference(videoDecoderPreference);
     SampleConstants.applyVideoDecoderPreference(videoDecoderPreference);
 
-    final recordVideoCodec = await SharedPreferencesUtil.instance
-            .getInt(SampleConstants.storageKeyAppConfigRecordVideoCodec) ??
-        RecordVideoCodec.source.index;
-    SampleConstants.recordVideoCodec = recordVideoCodec >= 0 &&
-            recordVideoCodec < RecordVideoCodec.values.length
-        ? RecordVideoCodec.values[recordVideoCodec]
-        : RecordVideoCodec.source;
+    int muxMode = SampleConstants.normalizeMuxMode(
+        await SharedPreferencesUtil.instance
+                .getInt(SampleConstants.storageKeyAppConfigMuxMode) ??
+            SampleConstants.switchOffValue);
 
     final initialized = await RapidKit.initialize(Configurations(
         id: appId,
@@ -125,7 +122,10 @@ class RapidInitialize {
         debugging: runtimeLoggingEnable,
         environment: Environment.values[apiEnv]));
 
-    if (initialized) await WifiAbility.set_network_logging_enabled(true);
+    if (initialized) {
+      SampleConstants.applyMuxMode(muxMode);
+      await WifiAbility.set_network_logging_enabled(true);
+    }
     return initialized;
   }
 }

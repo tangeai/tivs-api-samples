@@ -19,8 +19,6 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
   final _clockModeName = ["音频主时钟", "视频主时钟"];
   final _videoDecoderPreferenceValue = [0, 1, 2];
   final _videoDecoderPreferenceName = ["自动选择", "软件解码", "硬件解码"];
-  final _recordVideoCodecValue = [0, 1];
-  final _recordVideoCodecName = ["跟随原视频", "固定 H.264"];
 
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _packageNameController = TextEditingController();
@@ -40,7 +38,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
   int _bufferingMode = SampleConstants.bufferingMode;
   int _clockMode = SampleConstants.clockMode;
   int _videoDecoderPreference = SampleConstants.videoDecoderPreference;
-  int _recordVideoCodec = SampleConstants.recordVideoCodec.index;
+  int _muxMode = SampleConstants.switchOffValue;
 
   @override
   void initState() {
@@ -153,7 +151,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
         _clockModeWidget(),
       ],
       _videoDecoderPreferenceWidget(),
-      _recordVideoCodecWidget(),
+      _muxModeWidget(),
     ];
 
     return DecoratedBox(
@@ -281,10 +279,16 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
         _onPickVideoDecoderPreference);
   }
 
-  Widget _recordVideoCodecWidget() {
-    return _configRow('录制视频编码', _recordVideoCodecName[_recordVideoCodec],
-        _onPickRecordVideoCodec,
-        subtitle: '固定 H.264 时，H.265 原视频也会录制为 H.264 MP4');
+  Widget _muxModeWidget() {
+    return KeyedSubtree(
+      key: const ValueKey('rapid-config-mux-mode-row'),
+      child: _configRow(
+        'MP4 不转码直接写文件',
+        _switchName[_muxMode],
+        _onPickMuxModeSwitch,
+        subtitle: '关闭走老重编码路径，启用后录屏与云录像导出直接封装写入 MP4',
+      ),
+    );
   }
 
   void _onPickBufferingMode() {
@@ -390,7 +394,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
     );
   }
 
-  void _onPickRecordVideoCodec() {
+  void _onPickMuxModeSwitch() {
     showModalBottomSheet(
       backgroundColor: Colors.white,
       context: context,
@@ -398,18 +402,18 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
         return Padding(
           padding: const EdgeInsets.all(32.0),
           child: Wrap(
-            children: _recordVideoCodecValue.map((int codec) {
+            children: _switchValue.map((int mode) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
                 child: ListTile(
-                  title: Text(_recordVideoCodecName[codec]),
+                  title: Text(_switchName[mode]),
                   onTap: () async {
-                    setState(() => _recordVideoCodec = codec);
+                    setState(() {
+                      _muxMode = mode;
+                    });
                     await SharedPreferencesUtil.instance.setInt(
-                        SampleConstants.storageKeyAppConfigRecordVideoCodec,
-                        codec);
-                    SampleConstants.recordVideoCodec =
-                        RecordVideoCodec.values[codec];
+                        SampleConstants.storageKeyAppConfigMuxMode, _muxMode);
+                    SampleConstants.applyMuxMode(_muxMode);
                     Navigator.pop(context);
                   },
                 ),
@@ -757,8 +761,8 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
     SharedPreferencesUtil.instance.setInt(
         SampleConstants.storageKeyAppConfigVideoDecoderPreference,
         _videoDecoderPreference);
-    SharedPreferencesUtil.instance.setInt(
-        SampleConstants.storageKeyAppConfigRecordVideoCodec, _recordVideoCodec);
+    SharedPreferencesUtil.instance
+        .setInt(SampleConstants.storageKeyAppConfigMuxMode, _muxMode);
 
     final ret = await RapidInitialize.init();
 
@@ -783,6 +787,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
           bufferingMs: fixedBufferingMs);
       Player.setDefaultClockMode(PlayerClockMode.values[_clockMode]);
       SampleConstants.applyVideoDecoderPreference(_videoDecoderPreference);
+      SampleConstants.applyMuxMode(_muxMode);
 
       messenger?.showSnackBar(
         SnackBar(
@@ -966,15 +971,10 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
     localVideoDecoderPreference = SampleConstants.resolveVideoDecoderPreference(
         localVideoDecoderPreference);
 
-    int localRecordVideoCodec = await SharedPreferencesUtil.instance
-            .getInt(SampleConstants.storageKeyAppConfigRecordVideoCodec) ??
-        RecordVideoCodec.source.index;
-    if (localRecordVideoCodec < 0 ||
-        localRecordVideoCodec >= RecordVideoCodec.values.length) {
-      localRecordVideoCodec = RecordVideoCodec.source.index;
-    }
-    SampleConstants.recordVideoCodec =
-        RecordVideoCodec.values[localRecordVideoCodec];
+    int localMuxMode = SampleConstants.normalizeMuxMode(
+        await SharedPreferencesUtil.instance
+                .getInt(SampleConstants.storageKeyAppConfigMuxMode) ??
+            SampleConstants.switchOffValue);
 
     if (localAppId?.isNotEmpty == true) {
       _appId = localAppId!;
@@ -1006,7 +1006,7 @@ class _ConfigurePageState extends LifecycleAwareState<ConfigurePage> {
       _bufferingMode = localBufferingMode;
       _clockMode = localClockMode;
       _videoDecoderPreference = localVideoDecoderPreference;
-      _recordVideoCodec = localRecordVideoCodec;
+      _muxMode = localMuxMode;
       _idController.text = _appId;
       _packageNameController.text = _packageName;
       _fixedBufferingMsController.text = localFixedBufferingMs.toString();

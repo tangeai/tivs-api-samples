@@ -49,8 +49,7 @@ class SampleConstants {
       "rapid_sample_clock_mode_configured";
   static const String storageKeyAppConfigVideoDecoderPreference =
       "rapid_sample_video_decoder_preference";
-  static const String storageKeyAppConfigRecordVideoCodec =
-      "rapid_sample_record_video_codec";
+  static const String storageKeyAppConfigMuxMode = "rapid_sample_mux_mode";
   static const String storageKeyLiveStreamQuality =
       "rapid_sample_live_stream_quality";
 
@@ -77,7 +76,7 @@ class SampleConstants {
   static int clockMode = Platform.isAndroid ? 1 : 0;
   static int videoDecoderPreference =
       RapidSampleConfigure.videoDecoderPreferenceDefault.index;
-  static RecordVideoCodec recordVideoCodec = RecordVideoCodec.source;
+  static int muxMode = switchOffValue;
   static int? _runtimeVideoDecoderPreferenceOverride;
 
   static bool intercomAecEnabled = false;
@@ -114,5 +113,15 @@ class SampleConstants {
     videoDecoderPreference = activePreference;
     Player.setDefaultVideoDecoderPreference(
         VideoDecoderPreference.values[activePreference]);
+  }
+
+  static int normalizeMuxMode(int mode) {
+    return mode == switchOnValue ? switchOnValue : switchOffValue;
+  }
+
+  static void applyMuxMode(int mode) {
+    final activeMode = normalizeMuxMode(mode);
+    muxMode = activeMode;
+    Player.setMuxMode(activeMode);
   }
 }

@@ -483,20 +483,13 @@ class _LiveStreamWidgetState extends State<LiveStreamWidget>
         _resetRecordElapsedState();
       });
     } else {
-      final ret = await _playerCamera0.startRecord(
-          videoCodec: SampleConstants.recordVideoCodec);
-      final ret1 = _playerCamera1 == null
-          ? true
-          : await _playerCamera1!
-              .startRecord(videoCodec: SampleConstants.recordVideoCodec);
-      final ret2 = _playerCamera2 == null
-          ? true
-          : await _playerCamera2!
-              .startRecord(videoCodec: SampleConstants.recordVideoCodec);
-      final ret3 = _playerCamera3 == null
-          ? true
-          : await _playerCamera3!
-              .startRecord(videoCodec: SampleConstants.recordVideoCodec);
+      final ret = await _playerCamera0.startRecord();
+      final ret1 =
+          _playerCamera1 == null ? true : await _playerCamera1!.startRecord();
+      final ret2 =
+          _playerCamera2 == null ? true : await _playerCamera2!.startRecord();
+      final ret3 =
+          _playerCamera3 == null ? true : await _playerCamera3!.startRecord();
       if (!_canUpdateUi) return;
       if (!ret || !ret1 || !ret2 || !ret3) {
         await _stopStartedRecorders(ret, ret1, ret2, ret3);
